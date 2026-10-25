@@ -4,6 +4,7 @@ public class PlayerController:MonoBehaviour{
     public Rigidbody2D rb;
     public Animator ani;
     private bool isFacingRight=true;
+    public ParticleSystem ps;
     [Header("Movement")]
     public float moveSpeed=5f;
     public float horizontalMovement;
@@ -78,6 +79,7 @@ public class PlayerController:MonoBehaviour{
         ani.SetFloat("Yvelocity",rb.linearVelocityY);
         ani.SetFloat("Magnitude",rb.linearVelocity.magnitude);
         ani.SetBool("IsWallSliding",isWallSliding);
+        // ps.Play();
     }
     void FixedUpdate(){
         if(!isWallJumping){
@@ -90,7 +92,6 @@ public class PlayerController:MonoBehaviour{
     public void Jump(InputAction.CallbackContext context){
         if(context.canceled&&rb.linearVelocityY>0){
             rb.linearVelocity=new Vector2(rb.linearVelocityX,rb.linearVelocityY*0.5f);
-            ani.SetTrigger("Jump");
         }
         if(remainingJumps>0&&context.performed){
             rb.linearVelocity=new Vector2(rb.linearVelocityX,jumpPower);
