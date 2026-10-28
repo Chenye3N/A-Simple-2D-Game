@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 public class PlayerController:MonoBehaviour{
     public Rigidbody2D rb;
     public Animator ani;
@@ -31,10 +32,16 @@ public class PlayerController:MonoBehaviour{
     private float wallJumpDirection;
     private float wallJumpTimer,wallJumpTime=0.5f;
     public Vector2 wallJumpPower=new Vector2(5f,10f);
-
+    [Header("Dash")]
+    public float dashSpeed=20f;
+    public float dashTime=0.2f;
+    public float dashCooldown=0.1f;
+    bool isDashing=false,canDash=true;
+    TrailRenderer tr;
 
     void Start(){
         remainingJumps=maxJumps;
+        tr=GetComponent<TrailRenderer>();
     }
     private void Gravity(){
         if(rb.linearVelocityY<0){
@@ -69,6 +76,10 @@ public class PlayerController:MonoBehaviour{
         isWallJumping=false;
     }
     void Update(){
+        ani.SetFloat("Yvelocity",rb.linearVelocityY);
+        ani.SetFloat("Magnitude",rb.linearVelocity.magnitude);
+        ani.SetBool("IsWallSliding",isWallSliding);
+        if(isDashing) return;
         GroundChecker();
         Gravity();
         WallSlide();
@@ -76,18 +87,38 @@ public class PlayerController:MonoBehaviour{
         if(!isWallJumping){
             Flip();
         }
-        ani.SetFloat("Yvelocity",rb.linearVelocityY);
-        ani.SetFloat("Magnitude",rb.linearVelocity.magnitude);
-        ani.SetBool("IsWallSliding",isWallSliding);
         // ps.Play();
     }
     void FixedUpdate(){
+        if(isDashing) return;
         if(!isWallJumping){
             rb.linearVelocity=new Vector2(horizontalMovement*moveSpeed,rb.linearVelocityY);
         }
     }
     public void Move(InputAction.CallbackContext context){
         horizontalMovement=context.ReadValue<Vector2>().x;
+    }
+    public void Dash(InputAction.CallbackContext context){
+        if(context.performed&&canDash){
+            StartCoroutine(DashCoroutine());
+        }
+    }
+    private IEnumerator DashCoroutine(){
+        // Debug.Log("Dash");
+        Physics2D.IgnoreLayerCollision(7,8,true);
+        Physics2D.IgnoreLayerCollision(8,7,true);
+        canDash=false;isDashing=true;
+        tr.emitting=true;
+        float dashDirection=isFacingRight?1f:-1f;
+        rb.linearVelocity=new Vector2(dashDirection*dashSpeed,rb.linearVelocityY);
+        yield return new WaitForSeconds(dashTime);
+        Physics2D.IgnoreLayerCollision(7,8,false);
+        Physics2D.IgnoreLayerCollision(8,7,false);
+        rb.linearVelocity=new Vector2(0f,rb.linearVelocityY);
+        isDashing=false;
+        tr.emitting=false;
+        yield return new WaitForSeconds(dashCooldown);
+        canDash=true;
     }
     public void Jump(InputAction.CallbackContext context){
         if(context.canceled&&rb.linearVelocityY>0){
@@ -108,7 +139,7 @@ public class PlayerController:MonoBehaviour{
                 Vector3 ls=transform.localScale;
                 ls.x*=-1f;
                 transform.localScale=ls;
-                Debug.Log("翻转，现在朝"+(isFacingRight?"右":"左"));
+                //Debug.Log("翻转，现在朝"+(isFacingRight?"右":"左"));
             }
             Invoke(nameof(CancelWallJump),wallJumpTime+0.1f);
             ani.SetTrigger("Jump");

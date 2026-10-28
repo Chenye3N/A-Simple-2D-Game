@@ -12,6 +12,7 @@ public class PlayerHP : MonoBehaviour
     void Start(){
         ResetHP();
         GameController.GameOverEvent+=ResetHP;
+        HealthItem.HealEvent+=Heal;
     }
     void OnTriggerEnter2D(Collider2D other){
         Enemy enemy=other.GetComponent<Enemy>();
@@ -28,6 +29,13 @@ public class PlayerHP : MonoBehaviour
             PlayerDied?.Invoke();
         }
     }
+    void Heal(int healAmount){
+        currentHP+=healAmount;
+        if(currentHP>maxHP){
+            currentHP=maxHP;
+        }
+        healthUI.SetHP(currentHP);
+    }
     void ResetHP(){
         currentHP=maxHP;
         healthUI.SetMaxHP(maxHP);
@@ -39,5 +47,6 @@ public class PlayerHP : MonoBehaviour
     }
     void OnDestroy(){
         GameController.GameOverEvent-=ResetHP;
+        HealthItem.HealEvent-=Heal;
     }
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Enemy:MonoBehaviour{
     private Transform Player;
@@ -14,6 +15,8 @@ public class Enemy:MonoBehaviour{
     private int currentHP;
     private SpriteRenderer spriteRenderer;
     private Color color;
+    [Header("Loot")]
+    public List<LootItem> lootTable;
     void Start(){
         rb=GetComponent<Rigidbody2D>();
         Player=GameObject.FindWithTag("Player").GetComponent<Transform>();
@@ -62,6 +65,21 @@ public class Enemy:MonoBehaviour{
         spriteRenderer.color=color;
     }
     private void Die(){
+        Drop();
         Destroy(gameObject);
+    }
+    private void Drop(){
+        foreach(LootItem loot in lootTable){
+            if(Random.Range(0f,100f)<=loot.dropChance){
+                InstantiateLoot(loot.itemPrefab);
+                break;
+            }
+        }
+    }
+    private void InstantiateLoot(GameObject lootPrefab){
+        if(lootPrefab){
+            GameObject loot=Instantiate(lootPrefab,transform.position,Quaternion.identity);
+            loot.GetComponent<SpriteRenderer>().color=Color.red;
+        }
     }
 }
