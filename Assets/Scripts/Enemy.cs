@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class Enemy:MonoBehaviour{
     private Transform Player;
@@ -9,9 +10,16 @@ public class Enemy:MonoBehaviour{
     private bool isGrounded;
     private bool shouldJump;
     public int damage=1;
+    public int maxHP=3;
+    private int currentHP;
+    private SpriteRenderer spriteRenderer;
+    private Color color;
     void Start(){
         rb=GetComponent<Rigidbody2D>();
         Player=GameObject.FindWithTag("Player").GetComponent<Transform>();
+        currentHP=maxHP;
+        spriteRenderer=GetComponent<SpriteRenderer>();
+        color=spriteRenderer.color;
     }
 
     // Update is called once per frame
@@ -40,5 +48,20 @@ public class Enemy:MonoBehaviour{
             rb.AddForce(new Vector2(jumpDerection.x,jumpForce),ForceMode2D.Force);
         }
         
+    }
+    public void TakeDamage(int damage){
+        StartCoroutine(FlashWhite());
+        currentHP-=damage;
+        if(currentHP<=0){
+            Die();
+        }
+    }
+    private IEnumerator FlashWhite(){
+        spriteRenderer.color=Color.white;
+        yield return new WaitForSeconds(0.2f);
+        spriteRenderer.color=color;
+    }
+    private void Die(){
+        Destroy(gameObject);
     }
 }
