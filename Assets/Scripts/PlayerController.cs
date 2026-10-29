@@ -4,6 +4,7 @@ using System.Collections;
 public class PlayerController:MonoBehaviour{
     public Rigidbody2D rb;
     public Animator ani;
+    BoxCollider2D bc;
     private bool isFacingRight=true;
     public ParticleSystem ps;
     [Header("Movement")]
@@ -38,9 +39,12 @@ public class PlayerController:MonoBehaviour{
     public float dashCooldown=0.1f;
     bool isDashing=false,canDash=true;
     TrailRenderer tr;
+    [Header("Drop")]
+    private bool isOnPlatform=false;
 
     void Start(){
         remainingJumps=maxJumps;
+        bc=GetComponent<BoxCollider2D>();
         tr=GetComponent<TrailRenderer>();
     }
     private void Gravity(){
@@ -95,6 +99,16 @@ public class PlayerController:MonoBehaviour{
             rb.linearVelocity=new Vector2(horizontalMovement*moveSpeed,rb.linearVelocityY);
         }
     }
+    private void OnCollisionEnter2D(Collision2D collision){
+        if(collision.gameObject.CompareTag("Platform")){
+            isOnPlatform=true;
+        }
+    }
+    private void OnCollisionExit2D(Collision2D collision){
+        if(collision.gameObject.CompareTag("Platform")){
+            isOnPlatform=false;
+        }
+    }
     public void Move(InputAction.CallbackContext context){
         horizontalMovement=context.ReadValue<Vector2>().x;
     }
@@ -102,6 +116,17 @@ public class PlayerController:MonoBehaviour{
         if(context.performed&&canDash){
             StartCoroutine(DashCoroutine());
         }
+    }
+    public void Drop(InputAction.CallbackContext context){
+        if(context.performed&&isGround&&isOnPlatform&&bc.enabled){
+            StartCoroutine(DropCoroutine());
+        }
+
+    }
+    private IEnumerator DropCoroutine(){
+        bc.enabled=false;
+        yield return new WaitForSeconds(0.25f);
+        bc.enabled=true;
     }
     private IEnumerator DashCoroutine(){
         // Debug.Log("Dash");
