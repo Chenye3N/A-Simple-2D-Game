@@ -20,8 +20,13 @@ public class PlayerHP : MonoBehaviour
             TakeDamage(enemy.damage);
             StartCoroutine(FlashRed());
         }
+        Trap trap=other.GetComponent<Trap>();
+        if(trap&&trap.damage>0){
+            TakeDamage(trap.damage);
+            StartCoroutine(FlashRed());
+        }
     }
-    private void TakeDamage(int damage){
+    public void TakeDamage(int damage){
         currentHP-=damage;
         healthUI.SetHP(currentHP);
         if(currentHP<=0){
