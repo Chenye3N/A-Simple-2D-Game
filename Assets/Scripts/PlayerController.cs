@@ -7,8 +7,10 @@ public class PlayerController:MonoBehaviour{
     BoxCollider2D bc;
     private bool isFacingRight=true;
     public ParticleSystem ps;
+    public ParticleSystem speedBoostEffect;
     [Header("Movement")]
     public float moveSpeed=5f;
+    public float speedBoost=1f;
     public float horizontalMovement;
     [Header("GroundCheck")]
     public Transform groundCheck;
@@ -46,6 +48,7 @@ public class PlayerController:MonoBehaviour{
         remainingJumps=maxJumps;
         bc=GetComponent<BoxCollider2D>();
         tr=GetComponent<TrailRenderer>();
+        SpeedItem.OnSpeedBoost+=BoostSpeed;
     }
     private void Gravity(){
         if(rb.linearVelocityY<0){
@@ -96,7 +99,7 @@ public class PlayerController:MonoBehaviour{
     void FixedUpdate(){
         if(isDashing) return;
         if(!isWallJumping){
-            rb.linearVelocity=new Vector2(horizontalMovement*moveSpeed,rb.linearVelocityY);
+            rb.linearVelocity=new Vector2(horizontalMovement*moveSpeed*speedBoost,rb.linearVelocityY);
         }
     }
     private void OnCollisionEnter2D(Collision2D collision){
@@ -111,6 +114,16 @@ public class PlayerController:MonoBehaviour{
     }
     public void Move(InputAction.CallbackContext context){
         horizontalMovement=context.ReadValue<Vector2>().x;
+    }
+    private void BoostSpeed(float multiplier){
+        StartCoroutine(BoostSpeedCoroutine(multiplier));
+    }
+    private IEnumerator BoostSpeedCoroutine(float multiplier){
+        speedBoost=multiplier;
+        speedBoostEffect.Play();
+        yield return new WaitForSeconds(2f);
+        speedBoost=1f;
+        speedBoostEffect.Stop();
     }
     public void Dash(InputAction.CallbackContext context){
         if(context.performed&&canDash){
@@ -176,7 +189,8 @@ public class PlayerController:MonoBehaviour{
             Vector3 ls=transform.localScale;
             ls.x*=-1f;
             transform.localScale=ls;
-            Debug.Log("翻转，现在朝"+(isFacingRight?"右":"左"));
+            speedBoostEffect.transform.localScale=ls;
+            // Debug.Log("翻转，现在朝"+(isFacingRight?"右":"左"));
         }
     }
     private void GroundChecker(){
@@ -194,5 +208,8 @@ public class PlayerController:MonoBehaviour{
         Gizmos.DrawWireCube(groundCheck.position,groundCheckSize);
         Gizmos.color=Color.blue;
         Gizmos.DrawWireCube(wallCheck.position,wallCheckSize);
+    }
+    void OnDestroy(){
+        SpeedItem.OnSpeedBoost-=BoostSpeed;
     }
 }
