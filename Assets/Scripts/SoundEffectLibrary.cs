@@ -12,7 +12,7 @@ public class SoundEffectLibrary:MonoBehaviour{
             soundEffectLibrary.Add(group.name,group.soundEffects);
         }
     }
-    public AudioClip GetRamdomSOundEffect(string name){
+    public AudioClip GetRamdomSoundEffect(string name){
         if(soundEffectLibrary.ContainsKey(name)){
             List<AudioClip>soundEffects=soundEffectLibrary[name];
             if(soundEffects.Count>0){
