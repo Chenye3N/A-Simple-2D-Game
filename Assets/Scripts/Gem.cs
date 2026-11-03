@@ -6,6 +6,7 @@ public class Gem:MonoBehaviour,Item{
     public int worth=5;
     public void Collect(){
         OnGemCollection.Invoke(worth);
+        SoundEffectManager.Play("Gem");
         Destroy(gameObject);
     }
 }
