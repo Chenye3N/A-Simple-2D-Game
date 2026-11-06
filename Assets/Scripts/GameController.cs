@@ -27,12 +27,14 @@ public class GameController : MonoBehaviour
     }
     void GameOver(){
         gameOverScreen.SetActive(true);
+        MusicManager.PauseBackgroundMusic();
         survivedText.text="You survived "+survivedLevels+" level(s)!";
         Time.timeScale=0;
     }
     public void ResetGame(){
         GameOverEvent?.Invoke();
         gameOverScreen.SetActive(false);
+        MusicManager.PlayBackgroundMusic(true);
         survivedLevels=0;
         LoadCanvas.SetActive(false);
         Levels[currentLevel].gameObject.SetActive(false);

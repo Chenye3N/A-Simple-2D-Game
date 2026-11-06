@@ -16,6 +16,7 @@ public class MusicManager:MonoBehaviour{
         }
     }
     void Start(){
+        audioSource=GetComponent<AudioSource>();
         if(backgroundMusic!=null){
             PlayBackgroundMusic(false,backgroundMusic);
         }
@@ -25,18 +26,18 @@ public class MusicManager:MonoBehaviour{
         Instance.audioSource.volume=volume;
     }
     
-    private void PlayBackgroundMusic(bool resetSong,AudioClip backgroundMusic=null){
+    public static void PlayBackgroundMusic(bool resetSong,AudioClip backgroundMusic=null){
         if(backgroundMusic!=null){
-            audioSource.clip=backgroundMusic;
+            Instance.audioSource.clip=backgroundMusic;
         }
-        if(audioSource.clip!=null){
+        if(Instance.audioSource.clip!=null){
             if(resetSong){
-                audioSource.Stop();
+                Instance.audioSource.Stop();
             }
-            audioSource.Play();
+            Instance.audioSource.Play();
         }
     }
-    private void PauseBackgroundMusic(){
-        audioSource.Pause();
+    public static void PauseBackgroundMusic(){
+        Instance.audioSource.Pause();
     }
 }
